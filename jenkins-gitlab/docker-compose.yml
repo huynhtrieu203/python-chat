@@ -1,0 +1,43 @@
+version: '3.8'
+
+networks:
+  jenkins-gitlab:
+
+volumes:
+  jenkins-data:
+  jenkins-docker-certs:
+
+services:
+  jenkins:
+    build: .
+    image: 'jenkins'
+    privileged: true
+    user: root
+    ports:
+      - 8080:8080
+      - 50000:50000
+    container_name: jenkins
+    volumes:
+      - jenkins-docker-certs:/certs/client:ro
+      - jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - jenkins-gitlab
+
+
+  gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    container_name: 'gitlab'
+    restart: always
+    hostname: 'gitlab'
+    ports:
+      - '8081:80'
+      - '8082:443'
+      - '8083:22'
+    volumes:
+      - '/home/vlt/vietlt/jenkins_ho5/config:/etc/gitlab'
+      - '/home/vlt/vietlt/jenkins_ho5/logs:/var/log/gitlab'
+      - '/home/vlt/vietlt/jenkins_ho5/data:/var/opt/gitlab'
+    shm_size: '256m'
+    networks:
+      - jenkins-gitlab

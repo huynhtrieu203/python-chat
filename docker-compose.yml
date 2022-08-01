@@ -1,0 +1,33 @@
+version: "3"
+
+networks:
+  chatapp:
+    driver: bridge
+
+services:
+    chat_app:
+        image: chat_app
+        build: .
+        networks:
+            - chatapp
+    nginx:
+        image: nginx
+        ports:
+            - "8080:80"
+        volumes:
+            - './nginx.conf:/etc/nginx/nginx.conf'
+        networks:
+            - chatapp
+        depends_on:
+            - chat_app
+    db:
+        image:  mysql
+        container_name: "mysql"
+        environment:
+            - MYSQL_ROOT_PASSWORD=root1234
+            - MYSQL_DATABASE=mysql
+        volumes:
+            - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+        networks:
+            - chatapp
+    
